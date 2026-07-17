@@ -14,7 +14,7 @@ export const getRecommendations = async (
     // Pull a reasonable pool of trips to let the model choose from
     const trips = await Trip.find()
       .limit(30)
-      .select('title type location price tags rating shortDescription');
+      .select('title type location price tags rating shortDescription images');
 
     if (trips.length === 0) {
       return res
@@ -30,6 +30,7 @@ export const getRecommendations = async (
       price: t.price ?? 'N/A',
       tags: t.tags,
       rating: t.rating,
+      description: t.shortDescription,
     }));
 
     const prompt = `You are a travel recommendation engine for Roamly, a travel platform.
@@ -42,6 +43,7 @@ Available trips (JSON):
 ${JSON.stringify(tripSummaries)}
 
 Task: Select the 5 best matching trips for this user based on their interests and budget.
+Use the title, description, and location to judge relevance even if tags are missing or sparse.
 Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 {
   "recommendations": [
@@ -50,7 +52,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 }`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-flash-latest',
       contents: prompt,
     });
 
