@@ -4,7 +4,7 @@ import { betterAuth } from 'better-auth';
 import { MongoClient } from 'mongodb';
 
 const client = new MongoClient(process.env.MONGO_URI as string);
-const db = client.db();
+const db = client.db('roamly');
 
 export const auth = betterAuth({
   database: mongodbAdapter(db),
